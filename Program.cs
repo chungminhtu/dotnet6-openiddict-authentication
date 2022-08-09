@@ -1,16 +1,20 @@
 using System.Security.Principal;
 using authServer.Data;
 using authServer.Entities;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using OpenIddict.Abstractions;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var services = builder.Services;
 var config = builder.Configuration;
 
 services.AddControllers();
+services.AddRazorPages();
+
 services.AddSwaggerGen(c => c.SwaggerDoc("v1", new OpenApiInfo { Title = "auth server", Version = "v1" }));
 
 services.AddDbContext<ApplicationDbContext>(options =>
@@ -33,10 +37,13 @@ services.AddOpenIddict()
 .AddServer(options =>
 {
     // Enable the required endpoints
+    options.SetAuthorizationEndpointUris("/connect/authorize");
+    options.SetLogoutEndpointUris("/connect/logout");
     options.SetTokenEndpointUris("/connect/token");
-    options.SetUserinfoEndpointUris("/connect/userinfo");
     options.SetIntrospectionEndpointUris("/introspect");
+    options.SetUserinfoEndpointUris("/connect/userinfo");
 
+    options.AllowAuthorizationCodeFlow();
     options.AllowPasswordFlow();
     options.AllowRefreshTokenFlow();
     // Add all auth flows that you want to support
@@ -50,6 +57,9 @@ services.AddOpenIddict()
 
     // Custom auth flows are also supported
     // options.AllowCustomFlow("custom_flow_name");
+
+    // Force all client applications to use Proof Key for Code Exchange (PKCE).
+    options.RequireProofKeyForCodeExchange();
 
     // Using reference tokens means that the actual access and refresh tokens are stored in the database
     // and a token referencing the actual tokens (in the db) is used in the request header.
@@ -71,25 +81,41 @@ services.AddOpenIddict()
     options.SetRefreshTokenLifetime(TimeSpan.FromDays(7));
 
     // Register signing and encryption details
-    options.AddDevelopmentEncryptionCertificate()
-            .AddDevelopmentSigningCertificate();
+    // options.AddDevelopmentEncryptionCertificate()
+    //         .AddDevelopmentSigningCertificate();
+    options.AddEphemeralEncryptionKey()
+            .AddEphemeralSigningKey();
 
     // Register ASP.NET Core host and configure options
-    options.UseAspNetCore().EnableTokenEndpointPassthrough();
+    options.UseAspNetCore()
+    .EnableStatusCodePagesIntegration()
+    .EnableAuthorizationEndpointPassthrough()
+    .EnableLogoutEndpointPassthrough()
+    .EnableTokenEndpointPassthrough()
+    .EnableUserinfoEndpointPassthrough();
 })
 .AddValidation(options =>
 {
     options.UseLocalServer();
     options.UseAspNetCore();
+    options.EnableAuthorizationEntryValidation();
 });
 
-services.AddAuthentication(options =>
+// services.AddAuthentication(options =>
+// {
+//     options.DefaultScheme = OpenIddictConstants.Schemes.Bearer;
+//     options.DefaultChallengeScheme = OpenIddictConstants.Schemes.Bearer;
+// });
+
+services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+.AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, options =>
 {
-    options.DefaultScheme = OpenIddictConstants.Schemes.Bearer;
-    options.DefaultChallengeScheme = OpenIddictConstants.Schemes.Bearer;
+    // options.AccessDeniedPath = "/Account/Login";
+    options.LoginPath = "/Account/Login";
+    options.LogoutPath = "/Account/Logout";
 });
 
-services.AddIdentity<ApplicationUser, ApplicationRole>()
+services.AddIdentity<ApplicationUser, ApplicationRole>(options => options.SignIn.RequireConfirmedAccount = false)
     .AddEntityFrameworkStores<ApplicationDbContext>()
     .AddSignInManager();
 
@@ -100,9 +126,13 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    app.UseExceptionHandler("/Error");
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
+
+app.UseStaticFiles();
 
 app.UseRouting();
 
@@ -111,6 +141,8 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+
+app.MapRazorPages();
 
 SeedData.Database(app);
 SeedData.Clients(app);

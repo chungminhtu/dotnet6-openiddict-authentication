@@ -19,6 +19,41 @@ public static class SeedData
 
         listApp.Add(new OpenIddictApplicationDescriptor
         {
+            ClientId = "client_app",
+            ClientSecret = "050fdac1-21c8-455e-adef-ff81c4364269",
+            DisplayName = "client application",
+            ConsentType = OpenIddictConstants.ConsentTypes.Explicit,
+            RedirectUris =
+            {
+                new Uri("https://oauth.pstmn.io/v1/callback")
+            },
+            Permissions =
+            {
+                OpenIddictConstants.Permissions.Endpoints.Authorization,
+                OpenIddictConstants.Permissions.Endpoints.Logout,
+                OpenIddictConstants.Permissions.Endpoints.Token,
+
+                OpenIddictConstants.Permissions.GrantTypes.AuthorizationCode,
+                 OpenIddictConstants.Permissions.GrantTypes.ClientCredentials,
+                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
+
+                OpenIddictConstants.Permissions.ResponseTypes.Code,
+
+                OpenIddictConstants.Permissions.Scopes.Email,
+                OpenIddictConstants.Permissions.Scopes.Profile,
+                OpenIddictConstants.Permissions.Scopes.Roles,
+
+                OpenIddictConstants.Permissions.Prefixes.Scope + "api1",
+                OpenIddictConstants.Permissions.Prefixes.Scope + "api2"
+            },
+            Requirements =
+            {
+                OpenIddictConstants.Requirements.Features.ProofKeyForCodeExchange
+            }
+        });
+
+        listApp.Add(new OpenIddictApplicationDescriptor
+        {
             ClientId = "resource_server_1",
             ClientSecret = "9405b8c4-58db-4b88-b9aa-7e93ff24ba74",
             DisplayName = "resource server 1",
@@ -36,22 +71,6 @@ public static class SeedData
             Permissions =
             {
                 OpenIddictConstants.Permissions.Endpoints.Introspection
-            }
-        });
-
-        listApp.Add(new OpenIddictApplicationDescriptor
-        {
-            ClientId = "client_app",
-            ClientSecret = "050fdac1-21c8-455e-adef-ff81c4364269",
-            DisplayName = "client application",
-            Permissions =
-            {
-                OpenIddictConstants.Permissions.Endpoints.Token,
-                OpenIddictConstants.Permissions.Endpoints.Logout,
-                OpenIddictConstants.Permissions.GrantTypes.Password,
-                OpenIddictConstants.Permissions.GrantTypes.RefreshToken,
-                OpenIddictConstants.Permissions.Prefixes.Scope + "api1",
-                OpenIddictConstants.Permissions.Prefixes.Scope + "api2"
             }
         });
 
@@ -116,7 +135,7 @@ public static class SeedData
         var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
         foreach (var item in listUser)
         {
-            var existing= userManager.FindByNameAsync(item.UserName).GetAwaiter().GetResult();
+            var existing = userManager.FindByNameAsync(item.UserName).GetAwaiter().GetResult();
             if (existing == null)
             {
                 await userManager.CreateAsync(item, "P@ssw0rdSys");
