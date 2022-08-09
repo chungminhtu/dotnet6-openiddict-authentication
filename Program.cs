@@ -35,6 +35,7 @@ services.AddOpenIddict()
     // Enable the required endpoints
     options.SetTokenEndpointUris("/connect/token");
     options.SetUserinfoEndpointUris("/connect/userinfo");
+    options.SetIntrospectionEndpointUris("/introspect");
 
     options.AllowPasswordFlow();
     options.AllowRefreshTokenFlow();
@@ -55,6 +56,9 @@ services.AddOpenIddict()
     // The actual tokens are not made public.
     options.UseReferenceAccessTokens();
     options.UseReferenceRefreshTokens();
+
+    // Disable Encryption token
+    // options.DisableAccessTokenEncryption();
 
     // Register your scopes
     // Scopes are a list of identifiers used to specify what access privileges are requested.
