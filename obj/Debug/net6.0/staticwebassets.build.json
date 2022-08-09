@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Hash": "pQiv+PeNsAILCyQDsCiA1doSKPqPuIX6oSo1jOaf43A=",
+  "Source": "authServer",
+  "BasePath": "_content/authServer",
+  "Mode": "Default",
+  "ManifestType": "Build",
+  "ReferencedProjectsConfiguration": [],
+  "DiscoveryPatterns": [],
+  "Assets": []
+}
