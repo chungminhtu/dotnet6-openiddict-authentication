@@ -74,3 +74,8 @@ C:\moo\code\dotnet\authServer\obj\Debug\net6.0\refint\authServer.dll
 C:\moo\code\dotnet\authServer\obj\Debug\net6.0\authServer.pdb
 C:\moo\code\dotnet\authServer\obj\Debug\net6.0\authServer.genruntimeconfig.cache
 C:\moo\code\dotnet\authServer\obj\Debug\net6.0\ref\authServer.dll
+C:\moo\code\dotnet\authServer\bin\Debug\net6.0\Microsoft.AspNetCore.Cryptography.Internal.dll
+C:\moo\code\dotnet\authServer\bin\Debug\net6.0\Microsoft.AspNetCore.Cryptography.KeyDerivation.dll
+C:\moo\code\dotnet\authServer\bin\Debug\net6.0\Microsoft.AspNetCore.Identity.EntityFrameworkCore.dll
+C:\moo\code\dotnet\authServer\bin\Debug\net6.0\Microsoft.Extensions.Identity.Core.dll
+C:\moo\code\dotnet\authServer\bin\Debug\net6.0\Microsoft.Extensions.Identity.Stores.dll

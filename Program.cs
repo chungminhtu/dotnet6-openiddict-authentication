@@ -1,7 +1,6 @@
-using authServer;
+using System.Security.Principal;
 using authServer.Data;
 using authServer.Entities;
-using authServer.Stores;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -22,7 +21,7 @@ services.AddDbContext<ApplicationDbContext>(options =>
 
 services.Configure<IdentityOptions>(options =>
 {
-    options.ClaimsIdentity.UserNameClaimType = OpenIddictConstants.Claims.Name;
+    options.ClaimsIdentity.UserNameClaimType = OpenIddictConstants.Claims.Username;
     options.ClaimsIdentity.UserIdClaimType = OpenIddictConstants.Claims.Subject;
     options.ClaimsIdentity.RoleClaimType = OpenIddictConstants.Claims.Role;
     // configure more options if necessary...
@@ -49,7 +48,7 @@ services.AddOpenIddict()
     //      - Refresh token flow
 
     // Custom auth flows are also supported
-    options.AllowCustomFlow("custom_flow_name");
+    // options.AllowCustomFlow("custom_flow_name");
 
     // Using reference tokens means that the actual access and refresh tokens are stored in the database
     // and a token referencing the actual tokens (in the db) is used in the request header.
@@ -69,7 +68,7 @@ services.AddOpenIddict()
 
     // Register signing and encryption details
     options.AddDevelopmentEncryptionCertificate()
-                    .AddDevelopmentSigningCertificate();
+            .AddDevelopmentSigningCertificate();
 
     // Register ASP.NET Core host and configure options
     options.UseAspNetCore().EnableTokenEndpointPassthrough();
@@ -86,11 +85,9 @@ services.AddAuthentication(options =>
     options.DefaultChallengeScheme = OpenIddictConstants.Schemes.Bearer;
 });
 
-services.AddIdentity<User, Role>()
-    .AddSignInManager()
-    .AddUserStore<UserStore>()
-    .AddRoleStore<RoleStore>()
-    .AddUserManager<UserManager<User>>();
+services.AddIdentity<ApplicationUser, ApplicationRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddSignInManager();
 
 var app = builder.Build();
 
@@ -111,8 +108,10 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-SeedData.Client(app);
-SeedData.User(app);
+SeedData.Database(app);
+SeedData.Clients(app);
+SeedData.Scopes(app);
+SeedData.Roles(app);
+SeedData.Users(app);
 
 app.Run();
-

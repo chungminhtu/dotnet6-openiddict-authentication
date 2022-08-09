@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using OpenIddict.Abstractions;
 using OpenIddict.Validation.AspNetCore;
 
 namespace authServer.Controllers;
@@ -11,7 +12,9 @@ public class TestController : ControllerBase
     [Authorize(AuthenticationSchemes = OpenIddictValidationAspNetCoreDefaults.AuthenticationScheme)]
     public IActionResult Test()
     {
-        var identity = HttpContext.User.Identity;
-        return Ok(new { identity.Name });
+        var userId = HttpContext.User.FindFirst(OpenIddictConstants.Claims.Subject)?.Value;
+        var userName = HttpContext.User.FindFirst(OpenIddictConstants.Claims.Username)?.Value;
+        var role = HttpContext.User.FindFirst(OpenIddictConstants.Claims.Role)?.Value;
+        return Ok(new { Id = userId, UserName = userName, Role = role });
     }
 }
